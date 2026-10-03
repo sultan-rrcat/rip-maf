@@ -1,0 +1,59 @@
+[build-system]
+requires = ["setuptools>=61.0.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rip-maf"
+version = "1.0.0"
+description = "RIP-MAF — agentic RAG backend for the Open WebUI RIP Pipe (no notebooks, no frontend)."
+requires-python = ">=3.11"
+dependencies = [
+    # Core
+    "fastapi>=0.135.1",
+    "uvicorn[standard]>=0.41.0",
+    "python-multipart>=0.0.18",
+    "aiofiles>=23.2.1",
+    "pydantic>=2.12.5",
+    "pydantic-settings>=2.13.1",
+    "python-dotenv>=1.2.2",
+    # Database
+    "psycopg2-binary>=2.9.12",
+    "pgvector>=0.4.2",
+    # RAG pipeline
+    "docling>=2.81.0",
+    "sentence-transformers>=5.2.3",
+    "langchain-opendataloader-pdf>=2.0.0",
+    "langchain-text-splitters>=1.1.2",
+    "langchain-community>=0.4.2",
+    "langchain-core>=1.5.5",
+    # Orchestration
+    "langgraph>=1.1.6",
+    "langfuse>=4.14.5",
+    # HTTP
+    "httpx>=0.28.1",
+    "pyyaml>=6.0",
+    # Tools (doc.generate rendering)
+    "python-docx>=1.1.0",
+    "reportlab>=4.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "httpx>=0.28.1",
+    "ruff>=0.1.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q"
+testpaths = ["tests"]
+asyncio_mode = "auto"
