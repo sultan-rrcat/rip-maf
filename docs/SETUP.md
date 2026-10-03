@@ -68,6 +68,31 @@ $r.run_id
 Invoke-WebRequest -Uri "http://127.0.0.1:8010/v1/runs/$($r.run_id)/events" -Headers $h -TimeoutSec 600
 ```
 
+### 4b. Open WebUI (standalone)
+
+```powershell
+docker run -d -p 3000:8080 `
+  --add-host=host.docker.internal:host-gateway `
+  -v open-webui:/app/backend/data `
+  -e OLLAMA_BASE_URL=http://host.docker.internal:11434 `
+  -e OFFLINE_MODE=true `
+  -e HF_HUB_OFFLINE=1 `
+  -e RAG_EMBEDDING_ENGINE=ollama `
+  -e RAG_OLLAMA_BASE_URL=http://host.docker.internal:11434 `
+  -e RAG_EMBEDDING_MODEL=nomic-embed-text `
+  -e ENABLE_OPENAI_API=False `
+  -e CORS_ALLOW_ORIGIN=http://localhost:3000 `
+  -e WEBUI_SECRET_KEY=$env:WEBUI_SECRET_KEY `
+  -e RIP_BASE_URL=http://backend:8000 `
+  -e RIP_SERVICE_KEY=$env:RIP_SERVICE_KEY `
+  --name open-webui --restart always `
+  ghcr.io/open-webui/open-webui:main
+docker network connect rip-maf-net open-webui   # so RIP_BASE_URL resolves
+```
+
+Then create the `rip` (Pipe) and `rip_scope` (Filter) functions from
+`integrations/openwebui/` (see that folder's README) and select **RIP**.
+
 ## 5. Tests & lint
 
 ```powershell
