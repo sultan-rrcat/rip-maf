@@ -115,6 +115,7 @@ async def ingest_file(
     max_bytes = settings.max_upload_size_mb * 1024 * 1024
     file_size = 0
     try:
+        # Stream to disk first so size is known before the dedupe lookup.
         async with aiofiles.open(file_path, "wb") as f:
             while chunk := await file.read(_CHUNK_SIZE):
                 file_size += len(chunk)
@@ -133,6 +134,31 @@ async def ingest_file(
         if os.path.exists(file_path):
             os.remove(file_path)
         raise HTTPException(status_code=500, detail="Failed to save file") from None
+
+    # Dedupe: an identical upload (same corpus, filename, size, ready) is
+    # returned as-is instead of being re-embedded.
+    try:
+        with pg_connection() as conn, conn.cursor() as cur:
+            cur.execute(
+                "SELECT file_id, file_status FROM files WHERE corpus_id = %s "
+                "AND file_name = %s AND file_size = %s "
+                "AND file_status IN ('ready', 'processing') LIMIT 1",
+                (corpus_id, file.filename, file_size),
+            )
+            dupe = cur.fetchone()
+    except Exception:
+        logger.exception("ingest dedupe lookup failed corpus=%s", corpus_id)
+        dupe = None
+    if dupe:
+        try:
+            os.remove(file_path)
+        except OSError:
+            pass
+        logger.info(
+            "ingest dedupe hit corpus=%s name=%s existing=%s",
+            corpus_id, file.filename, dupe[0],
+        )
+        return {"id": dupe[0], "name": file.filename, "size": file_size, "status": dupe[1]}
 
     try:
         with pg_connection() as conn, conn.cursor() as cur:

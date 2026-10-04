@@ -25,10 +25,15 @@ RUN java -version
 # inference is BGE-M3 CPU + Ollama.
 RUN pip install torch --index-url https://download.pytorch.org/whl/cpu
 
-# Deps layer cached separately from code.
+# Deps layer cached separately from code: install a stub package first so
+# `pip install .` resolves dependencies only. A real src change then only
+# re-runs the cheap `--no-deps` reinstall below.
 COPY pyproject.toml README.md ./
+RUN mkdir -p src/rip_maf && touch src/rip_maf/__init__.py \
+    && pip install --index-url https://download.pytorch.org/whl/cpu --extra-index-url https://pypi.org/simple .
+
 COPY src ./src
-RUN pip install --index-url https://download.pytorch.org/whl/cpu --extra-index-url https://pypi.org/simple .
+RUN pip install --no-deps --index-url https://download.pytorch.org/whl/cpu --extra-index-url https://pypi.org/simple .
 
 RUN mkdir -p /app/uploads
 ENV UPLOAD_DIR=/app/uploads

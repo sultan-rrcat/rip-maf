@@ -23,7 +23,7 @@ services:
       - path: ./.env
         required: false
     environment:
-      DB_HOST: postgres
+      DB_HOST: rip-maf-postgres-1
       DB_PORT: 5432
       PORT: 8000
       NO_PROXY: postgres,backend,host.docker.internal,127.0.0.1,localhost
