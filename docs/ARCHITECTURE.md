@@ -9,7 +9,7 @@ identity; this service owns retrieval, tools, and orchestration.
 ┌────────────────────────── Open WebUI (separate) ─────────────────────────┐
 │  Chat UI · authn · history · file preview   (rip_pipe.py + rip_filter.py) │
 └────────────────────────────────┬──────────────────────────────────────────┘
-      X-RIP-Service-Key + X-RIP-User-Id/Name (rip-maf-net / 127.0.0.1)
+      X-RIP-Service-Key + X-RIP-User-Id/Name (rip-maf_rip-maf-net / 127.0.0.1)
 ┌────────────────────────────────▼──────────────────────────────────────────┐
 │                              rip-maf backend                              │
 │  POST /v1/corpus  →  POST /v1/corpus/{id}/files  →  POST /v1/runs         │

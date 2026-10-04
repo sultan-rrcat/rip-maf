@@ -38,7 +38,7 @@ Headers: `X-RIP-Service-Key` (shared secret), `X-RIP-User-Id`,
 copy .env.example .env    # set RIP_SERVICE_KEY, OLLAMA_BASE_URL, BGE paths
 docker compose up -d --build
 # point Open WebUI at it:
-docker network connect rip-maf-net open-webui
+docker network connect rip-maf_rip-maf-net open-webui
 ```
 
 ## Run Open WebUI (standalone)
@@ -60,7 +60,7 @@ docker run -d -p 3000:8080 `
   -e RIP_SERVICE_KEY=$env:RIP_SERVICE_KEY `
   --name open-webui --restart always `
   ghcr.io/open-webui/open-webui:main
-docker network connect rip-maf-net open-webui   # so RIP_BASE_URL resolves
+docker network connect rip-maf_rip-maf-net open-webui   # so RIP_BASE_URL resolves
 ```
 
 Then install the two Open WebUI functions from `integrations/openwebui/`

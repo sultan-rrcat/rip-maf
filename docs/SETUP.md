@@ -33,7 +33,7 @@ copy .env.example .env
 ```powershell
 docker compose up -d --build        # postgres + backend
 # join a standalone Open WebUI container to the private network:
-docker network connect rip-maf-net open-webui
+docker network connect rip-maf_rip-maf-net open-webui
 ```
 
 Health is inferred from container state (no health endpoint by design) and
@@ -87,7 +87,7 @@ docker run -d -p 3000:8080 `
   -e RIP_SERVICE_KEY=$env:RIP_SERVICE_KEY `
   --name open-webui --restart always `
   ghcr.io/open-webui/open-webui:main
-docker network connect rip-maf-net open-webui   # so RIP_BASE_URL resolves
+docker network connect rip-maf_rip-maf-net open-webui   # so RIP_BASE_URL resolves
 ```
 
 Then create the `rip` (Pipe) and `rip_scope` (Filter) functions from
@@ -109,3 +109,19 @@ pytest                 # DB tests run when Postgres is reachable; Ollama-live te
 - **Empty/irrelevant answers** → Ollama model missing or wrong context length
   (`OLLAMA_CONTEXT_WINDOW` must equal the server window).
 - **Slow first turn on big PDFs** → ingest runs inline in the Pipe before the run.
+- **"no deterministic builder for intent unknown — L3 ReAct required"** → the router
+  LLM call failed (most often `OLLAMA_DEFAULT_MODEL` not pulled: check
+  `ollama list`); L3 ReAct then fails on the same missing model and the honest
+  routing error surfaces.
+- **500 on file ingest / "VectorRAG singleton is not bound"** → BGE weights not
+  found; point `BGE_MODELS_DIR` at the host dir containing `bge-m3/` and
+  `reranker/` and recreate the backend.
+- **No traces in Langfuse** → `LANGFUSE_HOST` must be reachable *from inside the
+  backend container*: use `http://langfuse-langfuse-web-1:3000` and
+  `docker network connect langfuse_default rip-maf-backend-1` (plain
+  `localhost:3002` gets connection-refused and spans are dropped).
+- **"service key is not configured" in Open WebUI** → `RIP_SERVICE_KEY` empty in
+  the Open WebUI container env (shell variable was unset at `docker run`);
+  recreate it with the same value as the backend, or set the Pipe's valve.
+- **Network name** → compose names it `rip-maf_rip-maf-net` (project prefix),
+  not `rip-maf-net`.
